@@ -9,21 +9,21 @@ var dynamodb = new AWS.DynamoDB();
 
 //Table parameters for Users
 var params = {
-    TableName : "Tokens",
+    TableName : "Templates",
     KeySchema: [       
-    	  //Partition key = Account type(Trainer,Client, Gym, Admin,etc)
-        { AttributeName: "account", KeyType: "HASH"},  
-        //Sort key = Username 
-        { AttributeName: "token", KeyType: "RANGE" }  
+    	  //Partition key = email
+        { AttributeName: "email", KeyType: "HASH"},  
+        //Sort key = Template Name 
+        { AttributeName: "template", KeyType: "RANGE" }  
     ],
     AttributeDefinitions: [ 
         //String expeceted for both keys.      
-        { AttributeName: "account", AttributeType: "S" },
-        { AttributeName: "token", AttributeType: "S" }
+        { AttributeName: "email", AttributeType: "S" },
+        { AttributeName: "template", AttributeType: "S" }
     ],
     ProvisionedThroughput: {       
-        ReadCapacityUnits: 10, 
-        WriteCapacityUnits: 10
+        ReadCapacityUnits: 500, 
+        WriteCapacityUnits: 1000
     }
 };
 
