@@ -156,7 +156,8 @@ exports.checkSession = function(req, res, callback) {
 		if (err) {
 			console.error('error checking session', err);
 		} else {
-			callback(!!data.info);
+			console.log('data', data);
+			callback(!!data.Item.info);
 		}
 	});
 };

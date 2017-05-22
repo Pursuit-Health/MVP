@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dynamo": "java -Djava.library.path=./DynamoDBLocal_lib -jar DB/DynamoDBLocal.jar -sharedDb -inMemory"
+    "dynamo": "java -Djava.library.path=./DynamoDBLocal_lib -jar db/DynamoDBLocal.jar -sharedDb -inMemory"
   },
   "author": "",
   "license": "ISC",

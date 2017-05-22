@@ -87,6 +87,7 @@ router.route('/session')
 router.route('/*')
 .post(function(req, res, next) {
 	controller.checkSession(req, res, function(data) {
+		console.log(req.session);
 		if (data) {
 			next();
 		} else {
