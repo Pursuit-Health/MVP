@@ -2,8 +2,8 @@ Direction for using DynamoDB
 
 Download DynamoDB for use
 
-Move DynamoDBLocal.jar to DB folder of application.
+Move DynamoDBLocal.jar to db folder of application.
 
-Extract Dynamo jar file to application directory using jar xf DynamoDBLocal.jar 
+Extract Dynamo jar file to application directory by running 'jar xf DynamoDBLocal.jar' in the db folder. 
 
-Run DynamoDB using java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb -inMemory on the directory extracted at.
+Run npm run dynamo from the main directory.
