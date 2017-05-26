@@ -1,7 +1,11 @@
 var AWS = require("aws-sdk");
-var settings = require("../../settings.js");
 
-AWS.config.update(settings);
+AWS.config.update({
+    region: "us-east-1a",
+    endpoint: "https://dynamodb.us-east-1a.amazonaws.com",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
 
 var dynamodb = new AWS.DynamoDB();
 

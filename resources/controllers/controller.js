@@ -3,14 +3,18 @@ const tokendb = require('../dbTables/tokenTable');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const nodemailer = require('nodemailer');
-var settings = require("../../settings.js");
 var crypto = require("crypto");
 
 
 
 var AWS = require("aws-sdk");
 
-AWS.config.update(settings);
+AWS.config.update({
+    region: "us-east-1a",
+    endpoint: "https://dynamodb.us-east-1a.amazonaws.com",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 

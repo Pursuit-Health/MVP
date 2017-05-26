@@ -1,10 +1,14 @@
 const dynamodb = require('../dbTables/userTable');
-var settings = require("../../settings.js")
 
 //TODO: Change format so that you get and then set data for adding templates.
 var AWS = require("aws-sdk");
 
-AWS.config.update(settings);
+AWS.config.update({
+    region: "us-east-1a",
+    endpoint: "https://dynamodb.us-east-1a.amazonaws.com",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 /*
