@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dynamo": "java -Djava.library.path=./DynamoDBLocal_lib -jar db/DynamoDBLocal.jar -sharedDb -inMemory",
-    "ssh": "ssh -i 'BetaPursuit.pem.txt' ubuntu@ec2-34-204-98-183.compute-1.amazonaws.com"
+    "ssh": "ssh -i 'BetaPursuit.pem.txt' ubuntu@ec2-52-23-153-110.compute-1.amazonaws.com"
   },
   "author": "",
   "license": "ISC",

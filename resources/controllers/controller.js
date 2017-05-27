@@ -119,32 +119,35 @@ exports.checkUser = function(req, res, callback) {
 				} else {
 					let salt = new Date();
 					let saltString = data.Item.email + salt.toString();
-					bcrypt.hash(saltString, saltRounds, function(err, hash) {
-						console.log('hash', hash);
-						var params = {
-							TableName: 'Tokens',
-							Item: {
-								"token": hash,
-								"type": 'cookie',
-								"info": hash,
-								"ttl": Math.floor((Date.now() + 60 * 60 * 1000) / 1000)
-							}
-						};
-						docClient.put(params, function(err, data) {
-							if (err) {
-								console.error('session store problem');
-							} else {
-								req.session.id = hash;
-				        		//Sends back compare results to client.
-								callback(auth);
-							}
+					if (auth) {
+						bcrypt.hash(saltString, saltRounds, function(err, hash) {
+							console.log('hash', hash);
+							var params = {
+								TableName: 'Tokens',
+								Item: {
+									"token": hash,
+									"type": 'cookie',
+									"info": hash,
+									"ttl": Math.floor((Date.now() + 60 * 60 * 1000) / 1000)
+								}
+							};
+							docClient.put(params, function(err, data) {
+								if (err) {
+									console.error('session store problem');
+								} else {
+									req.session.id = hash;
+					        		//Sends back compare results to client.
+									callback(auth);
+								}
+							});
 						});
-					});
+					} else {
+						callback(auth);
+					}
 				}
 			});
 		}
 	});
-
 };
 
 exports.checkSession = function(req, res, callback) {
