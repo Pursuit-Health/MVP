@@ -10,8 +10,8 @@ var crypto = require("crypto");
 var AWS = require("aws-sdk");
 
 AWS.config.update({
-    region: "us-east-1a",
-    endpoint: "https://dynamodb.us-east-1a.amazonaws.com",
+    region: "us-west-2",
+    endpoint: "https://dynamodb.us-west-2.amazonaws.com",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
