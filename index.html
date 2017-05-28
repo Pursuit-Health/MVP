@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Pursuit Health Technologies</title>
+</head>
+<body>
+<form>
+	<input id="text" type="text" name="password" placeholder="Type your new password here">
+	<input id="text1" type="text" name="password" placeholder="Type it again to make sure">
+	<input id="submit" type="submit">
+</form>
+
+<script>
+var url_args_decode = function (url) {
+  var args_enc, el, i, nameval, ret;
+  ret = {};
+  // use the DOM to parse the URL via an 'a' element
+  el = document.createElement("a");
+  el.href = url;
+  // strip off initial ? on search and split
+  args_enc = el.search.substring(1).split('&');
+  for (i = 0; i < args_enc.length; i++) {
+    // convert + into space, split on =, and then decode 
+    args_enc[i].replace(/\+/g, ' ');
+    nameval = args_enc[i].split('=', 2);
+    ret[decodeURIComponent(nameval[0])]=decodeURIComponent(nameval[1]);
+  }
+  return ret;
+};
+
+const submit = function(e) {
+	e.preventDefault();
+	let text = document.getElementById('text');
+	let text1 = document.getElementById('text1');
+	if (text === text1) {
+		let 
+	}
+
+
+}
+
+let element  = document.getElementById('submit')
+
+element.addEventListener('submit', submit)
+</script>
+</body>
+</html>

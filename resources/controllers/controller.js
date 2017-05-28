@@ -10,10 +10,10 @@ var crypto = require("crypto");
 var AWS = require("aws-sdk");
 
 AWS.config.update({
-    region: "us-west-2",
-    endpoint: "https://dynamodb.us-west-2.amazonaws.com",
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+	region: "us-west-2",
+	endpoint: "https://dynamodb.us-west-2.amazonaws.com",
+	accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
+	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
 
 var docClient = new AWS.DynamoDB.DocumentClient();
@@ -95,9 +95,7 @@ exports.addUser = function(req, res, callback) {
 		}
 	});
 }; 
-
 //validateUser for signin
-//TODO: Create session on login.
 exports.checkUser = function(req, res, callback) {
 	var params = {
 		TableName: 'Users',
@@ -169,9 +167,34 @@ exports.checkSession = function(req, res, callback) {
 	});
 };
 
+exports.tokenCheck = function(req, res, callback) {
+	console.log(req.params.token);
+	var params = {
+		TableName: 'Tokens',
+		Key: {
+			"token": req.params.token,
+			"type": 'reset'
+		}
+	};
+	docClient.get(params, function(err, data) {
+		if (err) {
+			console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
+		} else {
+			console.log(data);
+			if (data.Item.info) {
+				res.render('reset', {
+					token: data.Item.info.passwordReset
+				});
+			}
+			
+
+		}
+	});
+};
+
 //passwordReset
 //requires account and email
-exports.forgotPassword = function(req,res,callback) {
+exports.forgotPassword = function(req, res, callback) {
 
 	crypto.randomBytes(20, function(err, buf) {
 		if (err) {
@@ -202,7 +225,7 @@ exports.forgotPassword = function(req,res,callback) {
 						service: 'gmail',
 						auth: {
 							user: 'bagelbageltest@gmail.com', //Our public email address
-							pass: 'testtest8'//Password
+							pass: 'testtest8'
 						}
 					});
 
@@ -230,66 +253,74 @@ exports.forgotPassword = function(req,res,callback) {
 
 //requires account, token, and new password from front end
 exports.changePassword = function(req, res, callback) {
-	var params = {
-		TableName: 'Tokens',
-		Key: {
-			"token": req.body.token,
-			"type": 'reset'
-		}
-	};
-	docClient.get(params, function(err, data) {
-		if (err) {
-			console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
-		} else {
-			console.log("Query succeeded.", data);
-			if (data.Item.info.tokenExpire > Date.now()) {
-				bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+	if (req.body.password !== req.body.confirm) {
+		res.render('error', {
+			token: req.params.token
+		});
+	} else {
+
+		var params = {
+			TableName: 'Tokens',
+			Key: {
+				"token": req.params.token,
+				"type": 'reset'
+			}
+		};
+		docClient.get(params, function(err, data) {
+			if (err) {
+				console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
+			} else {
+				console.log("Query succeeded.", data);
+				if (data.Item.info.tokenExpire > Date.now()) {
+					bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+						if (err) {
+							console.error("Encryption Error", JSON.stringify(err, null, 2));
+						} else {
+							var params = {
+								TableName: "Users",
+								Key: {
+									"email": data.Item.info.email,
+									"type": "Personal"
+								},
+								UpdateExpression: "set password = :p",
+								ExpressionAttributeValues: {
+									":p": hash
+								},
+								ReturnValues: "UPDATED_NEW"
+							};
+							docClient.update(params, function(err, data) {
+								if (err) {
+									console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+								} else {
+									console.log("password updated");
+									callback('Password Updated');
+								}
+							});
+						}
+					});
+				} else {
+					res.render('expire');
+					callback('Token Expired');
+				}
+				//Maybe send another email confirming password change
+				var params = {
+					TableName: "Users",
+					Key: {
+						"email": req.params.token,
+						"type": 'reset'
+					}
+				};
+
+				docClient.delete(params, function(err, data) {
 					if (err) {
-						console.error("Encryption Error", JSON.stringify(err, null, 2));
+						console.error("Delete error");
 					} else {
-						var params = {
-							TableName: "Users",
-							Key: {
-								"email": data.Item.info.email,
-								"type": "Personal"
-							},
-							UpdateExpression: "set password = :p",
-							ExpressionAttributeValues: {
-								":p": hash
-							},
-							ReturnValues: "UPDATED_NEW"
-						};
-						docClient.update(params, function(err, data) {
-							if (err) {
-								console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
-							} else {
-								console.log("password updated");
-								callback('Password Updated');
-							}
-						});
+						console.log("Deleted token");
 					}
 				});
-			} else {
-				callback('Token Expired');
 			}
-			//Maybe send another email confirming password change
-			var params = {
-				TableName: "Users",
-				Key: {
-					"email": req.body.token,
-					"type": 'reset'
-				}
-			};
-
-			docClient.delete(params, function(err, data) {
-				if (err) {
-					console.error("Delete error");
-				} else {
-					console.log("Deleted token");
-				}
-			});
-		}
-	});
+		});
+	}
 
 
 };
@@ -443,6 +474,7 @@ exports.deleteClient = function (req, res, callback) {
 		}
 	 });
 };
+
 
 
 
