@@ -230,10 +230,11 @@ exports.forgotPassword = function(req, res, callback) {
 					});
 
 					let mailOptions = {
-						from: '"Pursuit Health Technologies" <bagelbageltest@gmail.com>', // sender address
+						from: '"Pursuit Health Technologies" <andrew@pursuithealthtech.com>', // sender address
 						to: req.body.email, // list of receivers
 						subject: 'Password Reset', // Subject line
-						text: 'Click the following link to change your password: http://localhost:3000/reset/' + token, // plain text body
+						text: 'Click the following link to change your password: ec2-52-23-153-110.compute-1.amazonaws.com/reset/' + token +
+						'\n\n Please do not reply to this message. \n\n If you did not request this, please ignore this email and your password will remain unchanged.\n', // plain text body
 					};
 
 		        	      // send mail with defined transport object
