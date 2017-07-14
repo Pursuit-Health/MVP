@@ -80,11 +80,11 @@ exports.addUser = function(req, res, callback) {
 											if (err) {
 												console.error("Unable to add item. Error JSON:");
 											} else {
-												callback("Trainer Added");
+												callback(JSON.stringify("Trainer Added"));
 											}
 										});	
 									} else {
-										callback("Client Added");
+										callback(JSON.stringify("Client Added"));
 									}
 								}
 							});
@@ -135,12 +135,12 @@ exports.checkUser = function(req, res, callback) {
 								} else {
 									req.session.id = hash;
 					        		//Sends back compare results to client.
-									callback(auth);
+									callback(JSON.stringify(auth));
 								}
 							});
 						});
 					} else {
-						callback(auth);
+						callback(JSON.stringify(auth));
 					}
 				}
 			});
@@ -162,7 +162,7 @@ exports.checkSession = function(req, res, callback) {
 			console.error('error checking session', err);
 		} else {
 			console.log('data', data);
-			callback(!!data.Item.info);
+			callback(JSON.stringify(!!data.Item.info));
 		}
 	});
 };
@@ -243,7 +243,7 @@ exports.forgotPassword = function(req, res, callback) {
 							return console.log(error);
 						}
 						console.log('Message %s sent: %s', info.messageId, info.response);
-						callback("Email Sent!");
+						callback(JSON.stringify("Email Sent!"));
 					});
 				}
 			});
@@ -294,14 +294,14 @@ exports.changePassword = function(req, res, callback) {
 									console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
 								} else {
 									console.log("password updated");
-									callback('Password Updated');
+									callback(JSON.stringify('Password Updated'));
 								}
 							});
 						}
 					});
 				} else {
 					res.render('expire');
-					callback('Token Expired');
+					callback(JSON.stringify('Token Expired'));
 				}
 				//Maybe send another email confirming password change
 				var params = {
@@ -338,12 +338,12 @@ exports.changePassword = function(req, res, callback) {
 // //validateTwitterUser for twitter signin
 // exports.twitter = function(req, res, callback) {
 // 	passport.authenticate('twitter');
-// 	callback('asking for twitter info');
+// 	callback(JSON.stringify('asking for twitter info');
 // }
 
 // exports.twitterCallback = function(req, res, callback) {
 // 	passport.authenticate('twitter', { successRedirect: '/',failureRedirect: '/login' });
-// 	callback('checking if user was successful')
+// 	callback(JSON.stringify('checking if user was successful')
 
 // }
 
@@ -361,12 +361,12 @@ exports.changePassword = function(req, res, callback) {
 // //validateFacebookUser for facebook signin
 // exports.facebook = function(req, res, callback) {
 // 	passport.authenticate('facebook')
-// 	callback('asking for twitter info');
+// 	callback(JSON.stringify('asking for twitter info');
 // }
 
 // exports.facebookCallback = function(req, res, callback) {
 // 	passport.authenticate('facebook', { successRedirect: '/',failureRedirect: '/login' });
-// 	callback('checking if user was successful')
+// 	callback(JSON.stringify('checking if user was successful')
 // }
 
 
@@ -405,7 +405,7 @@ exports.addClient = function(req, res, callback) {
 					console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
 				} else {
 					console.log("client added");
-					callback("client added");
+					callback(JSON.stringify("client added"));
 				}
 			});	
 		}
@@ -426,7 +426,7 @@ exports.getAllClients = function(req, res, callback) {
 			console.error("Unable to get clients. Error: ", JSON.stringify(err, null, 2));
 		} else {
 			console.log('Found clients, sending JSON to app');
-			callback(JSON.stringify(data.Item.info));
+			callback(JSON.stringify(JSON.stringify(data.Item.info));
 		}
 	});
 };
@@ -469,7 +469,7 @@ exports.deleteClient = function (req, res, callback) {
 					console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
 				} else {
 					console.log("client added");
-					callback("client added");
+					callback(JSON.stringify("client added"));
 				}
 			});	
 		}
