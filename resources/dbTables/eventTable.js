@@ -16,14 +16,14 @@ var params = {
     TableName : "Events",
     KeySchema: [       
     	  //Partition key = email
-        { AttributeName: "id", KeyType: "HASH"},  
+        { AttributeName: "email", KeyType: "HASH"},  
         //Sort key = Template Name 
-        { AttributeName: "event", KeyType: "RANGE" }  
+        { AttributeName: "type", KeyType: "RANGE" }  
     ],
     AttributeDefinitions: [ 
         //String expeceted for both keys.      
-        { AttributeName: "id", AttributeType: "N" },
-        { AttributeName: "event", AttributeType: "S" }
+        { AttributeName: "email", AttributeType: "S" },
+        { AttributeName: "type", AttributeType: "S" }
     ],
     ProvisionedThroughput: {       
         ReadCapacityUnits: 500, 

@@ -59,9 +59,9 @@ for add event, the request body should look as follows
 
 exports.addEvent = function(req, res, callback) {
 	var params = {
-		TableName: "Users",
+		TableName: "Events",
 		Key: {
-			"type": "Events",
+			"type": "Event",
 			"email": req.body.email
 		}
 	};
@@ -75,9 +75,9 @@ exports.addEvent = function(req, res, callback) {
 			data.Item.events.push(event);
 			var Events = data.Item.events;
 			var params = {
-				TableName: "Users",
+				TableName: "Events",
 				Key: {
-					"type": "Events",
+					"type": "Event",
 					"email": req.body.email
 				},
 				UpdateExpression: "set events = :i",
