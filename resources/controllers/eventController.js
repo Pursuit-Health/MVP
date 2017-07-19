@@ -20,31 +20,31 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 //Each account should have an array of event objects to represent all the events per account.
 
 /*
-	The trainer event object should look as follows:
-	{
-		name: name,
-		start time:  date object,
-		end time: date object,
-		location: location,
-		clients: [array of client objects]
-	}
-	trainer/client object 
-	{
-		img:
-		fname:
-		lname:
-		email:
-	}
-	
+The trainer event object should look as follows:
+{
+name: name,
+start time:  date object,
+end time: date object,
+location: location,
+clients: [array of client objects]
+}
+trainer/client object 
+{
+img:
+fname:
+lname:
+email:
+}
 
-	The client event object should look as follows: 
-	{
-		name: name,
-		start time:  date object,
-		end time: date object,
-		location: location,
-		trainer: trainer object
-	}
+
+The client event object should look as follows: 
+{
+name: name,
+start time:  date object,
+end time: date object,
+location: location,
+trainer: trainer object
+}
 */
 
 /*

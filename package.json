@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dynamo": "java -Djava.library.path=./DynamoDBLocal_lib -jar db/DynamoDBLocal.jar -sharedDb -inMemory"
+    "dynamo": "java -Djava.library.path=./DynamoDBLocal_lib -jar db/DynamoDBLocal.jar -sharedDb -inMemory",
+    "ssh": "ssh -i 'BetaPursuit.pem.txt' ubuntu@ec2-52-23-153-110.compute-1.amazonaws.com"
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +17,7 @@
     "cookie-session": "^2.0.0-beta.1",
     "express": "^4.15.0",
     "helmet": "^3.5.0",
+    "jade": "^1.11.0",
     "morgan": "^1.8.1",
     "node-gyp": "^3.5.0",
     "nodemailer": "^3.1.5",

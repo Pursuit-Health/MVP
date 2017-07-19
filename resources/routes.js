@@ -32,6 +32,13 @@ router.route('/forgot')
 });
 
 //Change password
+router.route('/reset/:token')
+.get(function(req, res, next) {
+	controller.tokenCheck(req, res, function(data) {
+		res.status(200).send(data);
+	});
+});
+
 
 router.route('/reset/:token')
 .post(function(req, res, next) {

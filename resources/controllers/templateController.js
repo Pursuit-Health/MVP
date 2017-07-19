@@ -37,7 +37,7 @@ For adding a template (trainer only), the request object should look as follows:
 
 {
 	email: trainer email,
-	info: template object
+	template: template object
 }
 
 */

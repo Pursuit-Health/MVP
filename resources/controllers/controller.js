@@ -8,13 +8,14 @@ const helper = require('../helper.js');
 
 
 
+
 var AWS = require("aws-sdk");
 
 AWS.config.update({
-    region: "us-west-2",
-    endpoint: "https://dynamodb.us-west-2.amazonaws.com",
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+	region: "us-west-2",
+	endpoint: "https://dynamodb.us-west-2.amazonaws.com",
+	accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
+	secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
 
 var docClient = new AWS.DynamoDB.DocumentClient();
@@ -96,9 +97,7 @@ exports.addUser = function(req, res, callback) {
 		}
 	});
 }; 
-
 //validateUser for signin
-//TODO: Create session on login.
 exports.checkUser = function(req, res, callback) {
 	var params = {
 		TableName: 'Users',
@@ -139,12 +138,13 @@ exports.checkUser = function(req, res, callback) {
 								helper.sendResponse(callback, true, 'User Checked', null, auth);
 							}
 						});
-					});
+					} else {
+						callback(JSON.stringify(auth));
+					}
 				}
 			});
 		}
 	});
-
 };
 
 exports.checkSession = function(req, res, callback) {
@@ -165,9 +165,32 @@ exports.checkSession = function(req, res, callback) {
 	});
 };
 
+exports.tokenCheck = function(req, res, callback) {
+	console.log(req.params.token);
+	var params = {
+		TableName: 'Tokens',
+		Key: {
+			"token": req.params.token,
+			"type": 'reset'
+		}
+	};
+	docClient.get(params, function(err, data) {
+		if (err) {
+			console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
+		} else {
+			console.log(data);
+			if (data.Item.info) {
+				res.render('reset', {
+					token: data.Item.info.passwordReset
+				});
+			}
+		}
+	});
+};
+
 //passwordReset
 //requires account and email
-exports.forgotPassword = function(req,res,callback) {
+exports.forgotPassword = function(req, res, callback) {
 
 	crypto.randomBytes(20, function(err, buf) {
 		if (err) {
@@ -198,15 +221,16 @@ exports.forgotPassword = function(req,res,callback) {
 						service: 'gmail',
 						auth: {
 							user: 'bagelbageltest@gmail.com', //Our public email address
-							pass: 'testtest8'//Password
+							pass: 'testtest8'
 						}
 					});
 
 					let mailOptions = {
-						from: '"Pursuit Health Technologies" <bagelbageltest@gmail.com>', // sender address
+						from: '"Pursuit Health Technologies" <andrew@pursuithealthtech.com>', // sender address
 						to: req.body.email, // list of receivers
 						subject: 'Password Reset', // Subject line
-						text: 'Click the following link to change your password: http://localhost:3000/reset/' + token, // plain text body
+						text: 'Click the following link to change your password: ec2-52-23-153-110.compute-1.amazonaws.com/reset/' + token +
+						'\n\n Please do not reply to this message. \n\n If you did not request this, please ignore this email and your password will remain unchanged.\n', // plain text body
 					};
 
 		        	      // send mail with defined transport object
@@ -226,65 +250,75 @@ exports.forgotPassword = function(req,res,callback) {
 
 //requires account, token, and new password from front end
 exports.changePassword = function(req, res, callback) {
-	var params = {
-		TableName: 'Tokens',
-		Key: {
-			"token": req.body.token,
-			"type": 'reset'
-		}
-	};
-	docClient.get(params, function(err, data) {
-		if (err) {
-			helper.sendResponse(callback, null, "Unable to find token. Error JSON:", err);
-		} else {
-			console.log("Query succeeded.", data);
-			if (data.Item.info.tokenExpire > Date.now()) {
-				bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+
+	if (req.body.password !== req.body.confirm) {
+		res.render('error', {
+			token: req.params.token
+		});
+	} else {
+
+		var params = {
+			TableName: 'Tokens',
+			Key: {
+				"token": req.params.token,
+				"type": 'reset'
+			}
+		};
+		docClient.get(params, function(err, data) {
+			if (err) {
+				console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
+			} else {
+				console.log("Query succeeded.", data);
+				if (data.Item.info.tokenExpire > Date.now()) {
+					bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+						if (err) {
+							console.error("Encryption Error", JSON.stringify(err, null, 2));
+						} else {
+							var params = {
+								TableName: "Users",
+								Key: {
+									"email": data.Item.info.email,
+									"type": "Personal"
+								},
+								UpdateExpression: "set password = :p",
+								ExpressionAttributeValues: {
+									":p": hash
+								},
+								ReturnValues: "UPDATED_NEW"
+							};
+							docClient.update(params, function(err, data) {
+								if (err) {
+									console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+								} else {
+									console.log("password updated");
+									helper.sendResponse(callback,true,'Password Updated')
+								}
+							});
+						}
+					});
+				} else {
+					res.render('expire');
+					helper.sendResponse(callback,true,'Token Expire')
+				}
+				//Maybe send another email confirming password change
+				var params = {
+					TableName: "Users",
+					Key: {
+						"email": req.params.token,
+						"type": 'reset'
+					}
+				};
+
+				docClient.delete(params, function(err, data) {
 					if (err) {
-						helper.sendResponse(callback, null, "Encryption Error", err);
+						console.error("Delete error");
 					} else {
-						var params = {
-							TableName: "Users",
-							Key: {
-								"email": data.Item.info.email,
-								"type": "Personal"
-							},
-							UpdateExpression: "set password = :p",
-							ExpressionAttributeValues: {
-								":p": hash
-							},
-							ReturnValues: "UPDATED_NEW"
-						};
-						docClient.update(params, function(err, data) {
-							if (err) {
-								helper.sendResponse(callback, null, "Update Password Error JSON:", err);
-							} else {
-								helper.sendResponse(callback, true, "Password Updated");
-							}
-						});
+						console.log("Deleted token");
 					}
 				});
-			} else {
-				helper.sendResponse(callback, true, "Token Expired");
 			}
-			//Maybe send another email confirming password change
-			var params = {
-				TableName: "Users",
-				Key: {
-					"email": req.body.token,
-					"type": 'reset'
-				}
-			};
-
-			docClient.delete(params, function(err, data) {
-				if (err) {
-					console.error("Delete error");
-				} else {
-					console.log("Deleted token");
-				}
-			});
-		}
-	});
+		});
+	}
 
 
 };
@@ -301,12 +335,12 @@ exports.changePassword = function(req, res, callback) {
 // //validateTwitterUser for twitter signin
 // exports.twitter = function(req, res, callback) {
 // 	passport.authenticate('twitter');
-// 	callback('asking for twitter info');
+// 	callback(JSON.stringify('asking for twitter info');
 // }
 
 // exports.twitterCallback = function(req, res, callback) {
 // 	passport.authenticate('twitter', { successRedirect: '/',failureRedirect: '/login' });
-// 	callback('checking if user was successful')
+// 	callback(JSON.stringify('checking if user was successful')
 
 // }
 
@@ -324,12 +358,12 @@ exports.changePassword = function(req, res, callback) {
 // //validateFacebookUser for facebook signin
 // exports.facebook = function(req, res, callback) {
 // 	passport.authenticate('facebook')
-// 	callback('asking for twitter info');
+// 	callback(JSON.stringify('asking for twitter info');
 // }
 
 // exports.facebookCallback = function(req, res, callback) {
 // 	passport.authenticate('facebook', { successRedirect: '/',failureRedirect: '/login' });
-// 	callback('checking if user was successful')
+// 	callback(JSON.stringify('checking if user was successful')
 // }
 
 
@@ -367,7 +401,6 @@ exports.addClient = function(req, res, callback) {
 					helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
 				} else {
 					helper.sendResponse(callback, true, "Client added");
-
 				}
 			});	
 		}
@@ -434,6 +467,7 @@ exports.deleteClient = function (req, res, callback) {
 		}
 	 });
 };
+
 
 
 
