@@ -1,9 +1,13 @@
 const dynamodb = require('../dbTables/userTable');
-var settings = require("../../settings.js");
 
 var AWS = require("aws-sdk");
 
-AWS.config.update(settings);
+AWS.config.update({
+    region: "us-west-2",
+    endpoint: "https://dynamodb.us-west-2.amazonaws.com",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 
@@ -63,7 +67,7 @@ exports.addEvent = function(req, res, callback) {
 	};
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
 		} else {
 			var event = req.body.event;
 			var date = new Date();
@@ -84,11 +88,11 @@ exports.addEvent = function(req, res, callback) {
 			};
 			docClient.update(params, function(err, data) {
 				if (err) {
-					console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+					helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
 				} else {
 					console.log("template added");
 					let index = data.Attributes.events.length;
-					callback(JSON.stringify(data.Attributes.events[index]));
+					helper.sendResponse(callback, true, "Event Added", null, data.Attributes.events[index]);
 				}
 			});	
 		}
@@ -115,7 +119,7 @@ exports.sendEvent = function(req, res, callback) {
 	};
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to find item. Error JSON:", err);
 		} else {
 			var event = req.body.event;
 			event.clients = null;
@@ -136,10 +140,9 @@ exports.sendEvent = function(req, res, callback) {
 			};
 			docClient.update(params, function(err, data) {
 				if (err) {
-					console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+					helper.sendResponse(callback, null, "Unable to update item. Error JSON:", err);
 				} else {
-					console.log("template applied");
-					callback("template applied");
+					helper.sendResponse(callback, true, "event applied");
 				}
 			});
 		}
@@ -164,7 +167,7 @@ exports.acceptInvite = function(req, res, callback) {
 	};
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to find item. Error JSON:", err);
 		} else {
 			var invites = data.Item.invites;
 			var event;
@@ -188,7 +191,7 @@ exports.acceptInvite = function(req, res, callback) {
 			};
 			docClient.update(params, function(err, data) {
 				if (err) {
-					console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+					helper.sendResponse(callback, null, "Unable to update item. Error JSON:", err);
 				} else {
 					var params = {
 						TableName: "Users",
@@ -199,7 +202,7 @@ exports.acceptInvite = function(req, res, callback) {
 					};
 					docClient.get(params, function(err, data) {
 						if (err) {
-							console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+							helper.sendResponse(callback, null, "Unable to find item. Error JSON:", err);
 						} else {
 							data.Item.events.push(event);
 							var events = data.Item.events;
@@ -217,7 +220,7 @@ exports.acceptInvite = function(req, res, callback) {
 							};
 							docClient.update(params, function(err, data) {
 								if (err) {
-									console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+									helper.sendResponse(callback, null, "Unable to update item. Error JSON:", err);
 								} else { 
 									var params = {
 										TableName: "Users",
@@ -228,7 +231,7 @@ exports.acceptInvite = function(req, res, callback) {
 									};
 									docClient.get(params, function(err, data) {
 										if (err) {
-											console.error("Unable to update event's clients", JSON.stringify(err, null, 2));
+											helper.sendResponse(callback, null, "Unable to update event's clients", err);
 										} else {
 											var events = data.Item.Events;
 											events.forEach(function(ev, index) {
@@ -250,10 +253,9 @@ exports.acceptInvite = function(req, res, callback) {
 											};
 											docClient.update(params, function(err, data) {
 												if (err) {
-													console.error("Unable to update event's clients", JSON.stringify(err, null, 2));
+													helper.sendResponse(callback, null, "Unable to update event's clients", err);
 												} else {
-													console.log("event clients updated");
-													callback('invite accepted');
+													helper.sendResponse(callback, true, "event accepted");
 												}
 											});
 										}
@@ -279,10 +281,10 @@ exports.getAllEvents = function(req, res, callback) {
 
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error("Unable to get all events", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to get all events", err);
 		} else {
 			console.log('Got all events');
-			callback(JSON.stringify(data.Item.events));
+			helper.sendResponse(callback, true, "got all events", null, data.Item.events);
 		}
 	});
 };
@@ -298,10 +300,10 @@ exports.getAllInvites = function(req, res, callback) {
 
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error("Unable to get all events", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to get all events", err);
 		} else {
-			console.log('Got all events');
-			callback(JSON.stringify(data.Item.invites));
+			//console.log('Got all events');
+			helper.sendResponse(callback, true, "got all invites", null, data.Item.invites);
 		}
 	});
 };
@@ -329,7 +331,7 @@ exports.deleteEvent = function(req, res, callback) {
 			};
 			docClient.get(params, function(err, data) {
 				if (err) {
-					console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+					helper.sendResponse(callback, null, "Unable to find item", err);
 				} else {
 					var events = data.Item.events;
 					events.forEach(function(event, index) {
@@ -351,10 +353,9 @@ exports.deleteEvent = function(req, res, callback) {
 					};
 					docClient.update(params, function(err, data) {
 						if (err) {
-							console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+							helper.sendResponse(callback, null, "Unable to delete item", err);
 						} else {
-							console.log("template added");
-							callback("template added");
+							helper.sendResponse(callback, true, "event deleted");
 						}
 					});	
 				}
@@ -370,7 +371,7 @@ exports.deleteEvent = function(req, res, callback) {
 		};
 		docClient.get(params, function(err, data) {
 			if (err) {
-				console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+				helper.sendResponse(callback, null, "Unable to find item", err);
 			} else {
 				var events = data.Item.events;
 				events.forEach(function(event, index) {
@@ -392,10 +393,10 @@ exports.deleteEvent = function(req, res, callback) {
 				};
 				docClient.update(params, function(err, data) {
 					if (err) {
-						console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+						helper.sendResponse(callback, null, "Unable to delete item", err);
 					} else {
 						console.log("template added");
-						callback("template added");
+						helper.sendResponse(callback, true, "event deleted");
 					}
 				});	
 			}

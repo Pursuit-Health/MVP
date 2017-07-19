@@ -3,14 +3,19 @@ const tokendb = require('../dbTables/tokenTable');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const nodemailer = require('nodemailer');
-var settings = require("../../settings.js");
-var crypto = require("crypto");
+const crypto = require("crypto");
+const helper = require('../helper.js');
 
 
 
 var AWS = require("aws-sdk");
 
-AWS.config.update(settings);
+AWS.config.update({
+    region: "us-west-2",
+    endpoint: "https://dynamodb.us-west-2.amazonaws.com",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 
@@ -20,7 +25,7 @@ exports.addUser = function(req, res, callback) {
 
 	bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
 		if (err) {
-			console.error("Encryption Error", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Encryption Error", err);
 		} else {
 	  // Store hash in your password DB. 
 			var params = {
@@ -36,7 +41,7 @@ exports.addUser = function(req, res, callback) {
 			}; 
 			docClient.put(params, function(err, data) {
 				if (err) {
-					console.error("Unable to add item. Error JSON:");
+					helper.sendResponse(callback, null, "Unable to add item. Error JSON", err);
 				} else {
 					params = {
 						TableName: 'Users',
@@ -48,7 +53,7 @@ exports.addUser = function(req, res, callback) {
 					};
 					docClient.put(params, function(err, data) {
 						if (err) {
-							console.error("Unable to add item. Error JSON:");
+							helper.sendResponse(callback, null, "Unable to add item. Error JSON", err);
 						} else {
 							params = {
 								TableName: 'Users',
@@ -61,7 +66,7 @@ exports.addUser = function(req, res, callback) {
 							};
 							docClient.put(params, function(err, data) {
 								if (err) {
-									console.error("Unable to add item. Error JSON:");
+									helper.sendResponse(callback, null, "Unable to add item. Error JSON", err);
 								} else {
 									if (req.body.account === "trainer") {
 										params = {
@@ -74,13 +79,13 @@ exports.addUser = function(req, res, callback) {
 										};
 										docClient.put(params, function(err, data) {
 											if (err) {
-												console.error("Unable to add item. Error JSON:");
+												helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
 											} else {
-												callback("Trainer Added");
+												helper.sendResponse(callback, true, "Trainer Added");
 											}
 										});	
 									} else {
-										callback("Client Added");
+										helper.sendResponse(callback, true, "Client Added");
 									}
 								}
 							});
@@ -105,13 +110,12 @@ exports.checkUser = function(req, res, callback) {
 
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error("Unable to read item. Error JSON:", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to retrieve. Error JSON:", err);
 		} else {
-			console.log("GetItem succeeded", data.Item);
         //Comparing password
 			bcrypt.compare(req.body.password, data.Item.password, function(err, auth) {
 				if (err) {
-					console.error("Password Compare Error", JSON.stringify(err, null, 2));
+					helper.sendResponse(callback, null, "Password Compare Error", err);
 				} else {
 					let salt = new Date();
 					let saltString = data.Item.email + salt.toString();
@@ -128,11 +132,11 @@ exports.checkUser = function(req, res, callback) {
 						};
 						docClient.put(params, function(err, data) {
 							if (err) {
-								console.error('session store problem');
+								helper.sendResponse(callback, null, "Session Store Problem", err);
 							} else {
 								req.session.id = hash;
 				        		//Sends back compare results to client.
-								callback(auth);
+								helper.sendResponse(callback, true, 'User Checked', null, auth);
 							}
 						});
 					});
@@ -154,10 +158,9 @@ exports.checkSession = function(req, res, callback) {
 	};
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error('error checking session', err);
+			helper.sendResponse(callback, null, "Error checking session", err);
 		} else {
-			console.log('data', data);
-			callback(!!data.Item.info);
+			helper.sendResponse(callback, true, "Client Added", null, !!data.Item.info);
 		}
 	});
 };
@@ -168,7 +171,7 @@ exports.forgotPassword = function(req,res,callback) {
 
 	crypto.randomBytes(20, function(err, buf) {
 		if (err) {
-			console.error("Failed to generate reset token");
+			helper.sendResponse(callback, null, "Failed to generate reset token", err);
 		} else {
 			var token = buf.toString('hex');
 
@@ -188,7 +191,7 @@ exports.forgotPassword = function(req,res,callback) {
 		           
 			docClient.put(params, function(err, data) {
 				if (err) {
-					console.error("Unable to add item. Error JSON:");
+					helper.sendResponse(callback, null, "Store token error JSON:", err);
 				} else {
 					console.log("Added item", token);
 					let transporter = nodemailer.createTransport({
@@ -209,10 +212,10 @@ exports.forgotPassword = function(req,res,callback) {
 		        	      // send mail with defined transport object
 					transporter.sendMail(mailOptions, (error, info) => {
 						if (error) {
-							return console.log(error);
+							helper.sendResponse(callback, null, "Email Error", error);
 						}
-						console.log('Message %s sent: %s', info.messageId, info.response);
-						callback("Email Sent!");
+						//console.log('Message %s sent: %s', info.messageId, info.response);
+						helper.sendResponse(callback, true, "Email Sent");
 					});
 				}
 			});
@@ -232,13 +235,13 @@ exports.changePassword = function(req, res, callback) {
 	};
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to find token. Error JSON:", err);
 		} else {
 			console.log("Query succeeded.", data);
 			if (data.Item.info.tokenExpire > Date.now()) {
 				bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
 					if (err) {
-						console.error("Encryption Error", JSON.stringify(err, null, 2));
+						helper.sendResponse(callback, null, "Encryption Error", err);
 					} else {
 						var params = {
 							TableName: "Users",
@@ -254,16 +257,15 @@ exports.changePassword = function(req, res, callback) {
 						};
 						docClient.update(params, function(err, data) {
 							if (err) {
-								console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+								helper.sendResponse(callback, null, "Update Password Error JSON:", err);
 							} else {
-								console.log("password updated");
-								callback('Password Updated');
+								helper.sendResponse(callback, true, "Password Updated");
 							}
 						});
 					}
 				});
 			} else {
-				callback('Token Expired');
+				helper.sendResponse(callback, true, "Token Expired");
 			}
 			//Maybe send another email confirming password change
 			var params = {
@@ -344,9 +346,8 @@ exports.addClient = function(req, res, callback) {
 	};
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
 		} else {
-			console.log("client added");
 			data.Item.info.push(req.body.client);
 			var clients = data.Item.info;
 			var params = {
@@ -363,10 +364,10 @@ exports.addClient = function(req, res, callback) {
 			};
 			docClient.update(params, function(err, data) {
 				if (err) {
-					console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+					helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
 				} else {
-					console.log("client added");
-					callback("client added");
+					helper.sendResponse(callback, true, "Client added");
+
 				}
 			});	
 		}
@@ -384,10 +385,9 @@ exports.getAllClients = function(req, res, callback) {
 	};
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error("Unable to get clients. Error: ", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to get clients", err);
 		} else {
-			console.log('Found clients, sending JSON to app');
-			callback(JSON.stringify(data.Item.info));
+			helper.sendResponse(callback, true, "Password Updated", null, data.Item.info);
 		}
 	});
 };
@@ -404,9 +404,8 @@ exports.deleteClient = function (req, res, callback) {
 	};
 	docClient.get(params, function(err, data) {
 		if (err) {
-			console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+			helper.sendResponse(callback, null, "Unable to find item. Error JSON:", err);
 		} else {
-			console.log("client added");
 			var clients = data.Item.info;
 			clients.forEach(function(client, index) {
 				if (client.fname === req.body.client.fname && client.lname === req.body.client.lname && client.img === req.body.client.img) {
@@ -427,10 +426,9 @@ exports.deleteClient = function (req, res, callback) {
 			};
 			docClient.update(params, function(err, data) {
 				if (err) {
-					console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+					helper.sendResponse(callback, null, "Unable to delete item. Error JSON:", err);
 				} else {
-					console.log("client added");
-					callback("client added");
+					helper.sendResponse(callback, true, "client deleted");
 				}
 			});	
 		}

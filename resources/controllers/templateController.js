@@ -1,10 +1,14 @@
-const dynamodb = require('../dbTables/userTable');
-var settings = require("../../settings.js")
+
 
 //TODO: Change format so that you get and then set data for adding templates.
 var AWS = require("aws-sdk");
 
-AWS.config.update(settings);
+AWS.config.update({
+    region: "us-west-2",
+    endpoint: "arn:aws:dynamodb:us-east-1:399707203552",
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 /*
@@ -48,7 +52,7 @@ exports.addTemplate = function(req, res, callback) {
 
    docClient.get(params, function(err, data) {
    	if (err) {
-   	   console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+   	   helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
    	} else {
    		var template = req.body.template;
    		var date = new Date();
@@ -71,10 +75,11 @@ exports.addTemplate = function(req, res, callback) {
    		docClient.update(params, function(err, data) {
 
    			if (err) {
-   			   console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+   			   helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
    			} else {
    				console.log("template added", data.Attributes.info);
-   				callback(JSON.stringify(data.Attributes.info[index]));
+   				helper.sendResponse(callback, true, "Template added", null, data.Attributes.info[index]);
+
    			}
    		});	
    	}
@@ -104,7 +109,7 @@ exports.applyTemplate = function(req,res,callback) {
 
 	docClient.get(params, function(err, data) {
 		if(err) {
-			console.log("Template acquisition error")
+			helper.sendResponse(callback, null, "Template aquisition error", err);
 		} else {
 				var params = {
 			 	   TableName: "Users",
@@ -116,7 +121,7 @@ exports.applyTemplate = function(req,res,callback) {
 
 			  docClient.get(params, function(err, data) {
 			  	if (err) {
-			  	   console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+			  	   helper.sendResponse(callback, null, "Unable to find item. Error JSON:", err);
 			  	} else {
 			  		data.Item.info.push(req.body.template)
 			  		var templates = data.Item.info;
@@ -135,10 +140,10 @@ exports.applyTemplate = function(req,res,callback) {
 			  		docClient.update(params, function(err, data) {
 
 			  			if (err) {
-			  			   console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+			  			   helper.sendResponse(callback, null, "Unable to apply item. Error JSON:", err);
 			  			} else {
 			  				console.log("template added", data)
-			  				callback("template added");
+			  				helper.sendResponse(callback, true, "Template applied");
 			  			}
 			  		})	
 			  	}
@@ -157,11 +162,11 @@ exports.getAllTemplates = function(req, res, callback) {
 	}
 
 	docClient.get(params, function(err,data) {
-		if(err) {
-			console.error("Unable to get all templates. Error JSON:", JSON.stringify(err, null, 2))
+		if (err) {
+			helper.sendResponse(callback, null, "Unable to get all templates. Error JSON:", err);
 		} else {
 			console.log("got all clients");
-			callback(JSON.stringify(data.Item.info))
+			helper.sendResponse(callback, true, "Got all Templates", null, data.Item.info);
 		}
 	})
 }
@@ -184,7 +189,7 @@ exports.deleteTemplate = function(req,res,callback) {
 
    docClient.get(params, function(err, data) {
    	if (err) {
-   	   console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+   	   helper.sendResponse(callback, null, "Unable to find item. Error JSON:", err);
    	} else {
    		var templates = data.Item.info
    		console.log(typeof templates);
@@ -210,10 +215,10 @@ exports.deleteTemplate = function(req,res,callback) {
    		docClient.update(params, function(err, data) {
 
    			if (err) {
-   			   console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+   			   helper.sendResponse(callback, null, "Unable to delete item. Error JSON:", err);
    			} else {
    				console.log("template deleted")
-   				callback("template deleted");
+   				helper.sendResponse(callback, true, "Template deleted");
    			}
    		})	
    	}
@@ -267,7 +272,7 @@ exports.updateTemplate = function(req,res,callback) {
 
 	   docClient.get(params, function(err, data) {
 	   	if (err) {
-	   	   console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+	   	   helper.sendResponse(callback, null, "Unable to find item. Error JSON:", err);
 	   	} else {
 	   		var templates = data.Item.info
 	   		templates.forEach(function(template, index) {
@@ -290,10 +295,10 @@ exports.updateTemplate = function(req,res,callback) {
 	   		docClient.update(params, function(err, data) {
 
 	   			if (err) {
-	   			   console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+	   			   helper.sendResponse(callback, null, "Unable to update item. Error JSON:", err);
 	   			} else {
 	   				console.log("template added")
-	   				callback("template added");
+	   				helper.sendResponse(callback, true, "Template updated")
 	   			}
 	   		})	
 	   	}
