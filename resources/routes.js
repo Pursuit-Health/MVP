@@ -11,13 +11,19 @@ router.route('/signup')
 .post(function(req, res, next) {
 	controller.addUser(req, res, function(data) {
 		//TODO: Confirm whether question of success is required.
-		res.status(201).end(data);
+		if (data.error) {
+			res.status(500).send(data);
+		}
+		res.status(201).send(data);
 	});
 });
 //Sign in Route
 router.route('/signin')
 .post(function(req, res, next) {
 	controller.checkUser(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 }); 
@@ -27,6 +33,9 @@ router.route('/signin')
 router.route('/forgot')
 .post(function(req, res, next) {
 	controller.forgotPassword(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -35,6 +44,9 @@ router.route('/forgot')
 router.route('/reset/:token')
 .get(function(req, res, next) {
 	controller.tokenCheck(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(200).send(data);
 	});
 });
@@ -43,41 +55,12 @@ router.route('/reset/:token')
 router.route('/reset/:token')
 .post(function(req, res, next) {
 	controller.changePassword(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
-
-
-//Facebook and Twitter Login Routes 
-//TODO: get twitter consumer key and facebook api key. Setup on controller.js
-
-// router.route('/auth/facebook')
-// .get(function(req, res, next) {
-// 	controller.facebook(req, res, function(data) {
-// 		res.status(200).send(data);
-// 	});
-// });
-
-// router.route('/auth/facebook/callback')
-// .get(function(req, res, next) {
-// 	controller.facebookCallback(req, res, function(data) {
-// 		res.status(200).send(data);
-// 	});
-// });
-
-// router.route('/auth/twitter')
-// .get(function(req, res, next) {
-// 	controller.twitter(req, res, function(data) {
-// 		res.status(200).send(data);
-// 	});
-// });
-
-// router.route('/auth/twitter/callback')
-// .get(function(req, res, next) {
-// 	controller.twitterCallback(req, res, function(data) {
-// 		res.status(200).send(data);
-// 	});
-// });
 
 
 //Check Session Routes
@@ -86,6 +69,9 @@ router.route('/reset/:token')
 router.route('/session')
 .post(function(req, res, next) {
 	controller.checkSession(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -96,6 +82,9 @@ router.route('/*')
 	controller.checkSession(req, res, function(data) {
 		console.log(req.session);
 		if (data) {
+			if (data.error) {
+				res.status(500).send(data);
+			}
 			next();
 		} else {
 			res.status(401).send('You haven\'t logged in yet or your session has expired.');		
@@ -116,6 +105,9 @@ router.route('/logout')
 router.route('/template/create')
 .post(function(req, res, next) {
 	templateController.addTemplate(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -123,6 +115,9 @@ router.route('/template/create')
 router.route('/template/apply')
 .post(function(req, res, next) {
 	templateController.applyTemplate(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -130,6 +125,9 @@ router.route('/template/apply')
 router.route('/template/getAll')
 .post(function(req, res, next) {
 	templateController.getAllTemplates(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -137,6 +135,9 @@ router.route('/template/getAll')
 router.route('/template/delete')
 .post(function(req, res, next) {
 	templateController.deleteTemplate(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -144,6 +145,9 @@ router.route('/template/delete')
 router.route('/template/update')
 .post(function(req, res, next) {
 	templateController.updateTemplate(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -152,6 +156,9 @@ router.route('/template/update')
 router.route('/event/add')
 .post(function(req, res, next) {
 	eventController.addEvent(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -159,6 +166,9 @@ router.route('/event/add')
 router.route('/event/send')
 .post(function(req, res, next) {
 	eventController.sendEvent(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -166,6 +176,9 @@ router.route('/event/send')
 router.route('/event/getAllEvents')
 .post(function(req, res, next) {
 	eventController.getAllEvents(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -173,6 +186,9 @@ router.route('/event/getAllEvents')
 router.route('/event/getAllInvites')
 .post(function(req, res, next) {
 	eventController.getAllInvites(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -180,6 +196,9 @@ router.route('/event/getAllInvites')
 router.route('/event/accept')
 .post(function(req, res, next) {
 	eventController.acceptInvite(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -188,6 +207,9 @@ router.route('/event/accept')
 router.route('/client/add')
 .post(function(req, res, next) {
 	controller.addClient(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });
@@ -195,6 +217,9 @@ router.route('/client/add')
 router.route('/client/getAll')
 .post(function(req, res, next) {
 	controller.getAllClients(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(200).send(data);
 	});
 });
@@ -202,6 +227,9 @@ router.route('/client/getAll')
 router.route('/client/delete')
 .post(function(req, res, next) {
 	controller.deleteClient(req, res, function(data) {
+		if (data.error) {
+			res.status(500).send(data);
+		}
 		res.status(201).send(data);
 	});
 });

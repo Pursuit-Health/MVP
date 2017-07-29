@@ -45,7 +45,7 @@ exports.addUser = function(req, res, callback) {
 					helper.sendResponse(callback, null, "Unable to add item. Error JSON", err);
 				} else {
 					params = {
-						TableName: 'Users',
+						TableName: 'Templates',
 						Item: {
 							type: "Templates",
 							email: req.body.email,
@@ -57,9 +57,8 @@ exports.addUser = function(req, res, callback) {
 							helper.sendResponse(callback, null, "Unable to add item. Error JSON", err);
 						} else {
 							params = {
-								TableName: 'Users',
+								TableName: 'Events',
 								Item: {
-									type: "Events",
 									email: req.body.email,
 									events: [],
 									invites: []
@@ -138,10 +137,8 @@ exports.checkUser = function(req, res, callback) {
 								helper.sendResponse(callback, true, 'User Checked', null, auth);
 							}
 						});
-					} else {
-						callback(JSON.stringify(auth));
-					}
-				}
+					}); 
+				}	
 			});
 		}
 	});
@@ -291,14 +288,14 @@ exports.changePassword = function(req, res, callback) {
 									console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
 								} else {
 									console.log("password updated");
-									helper.sendResponse(callback,true,'Password Updated')
+									helper.sendResponse(callback,true,'Password Updated');
 								}
 							});
 						}
 					});
 				} else {
 					res.render('expire');
-					helper.sendResponse(callback,true,'Token Expire')
+					helper.sendResponse(callback,true,'Token Expire');
 				}
 				//Maybe send another email confirming password change
 				var params = {
