@@ -2,7 +2,7 @@ var AWS = require("aws-sdk");
 
 AWS.config.update({
     region: "us-west-2",
-    endpoint: "arn:aws:dynamodb:us-east-1:399707203552:table/Events",
+    endpoint: "https://dynamodb.us-west-2.amazonaws.com",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });

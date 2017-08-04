@@ -1,4 +1,3 @@
-const dynamodb = require('../dbTables/eventTable');
 
 var AWS = require("aws-sdk");
 

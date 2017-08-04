@@ -1,4 +1,3 @@
-const dynamodb = require('../dbTables/templateTable');
 
 var AWS = require("aws-sdk");
 

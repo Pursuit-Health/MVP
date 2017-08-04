@@ -1,13 +1,12 @@
-const dynamodb = require('../dbTables/userTable');
+const userdb = require('../dbTables/userTable');
 const tokendb = require('../dbTables/tokenTable');
+const templatedb = require('../dbTables/templateTable');
+const eventdb = require('../dbTables/eventTable');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const nodemailer = require('nodemailer');
 const crypto = require("crypto");
 const helper = require('../helper.js');
-
-
-
 
 var AWS = require("aws-sdk");
 
