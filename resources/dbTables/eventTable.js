@@ -2,7 +2,7 @@ var AWS = require("aws-sdk");
 
 AWS.config.update({
     region: "us-west-2",
-    endpoint: "https://dynamodb.us-west-2.amazonaws.com",
+    endpoint: "arn:aws:dynamodb:us-east-1:399707203552:table/Events",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
@@ -18,12 +18,10 @@ var params = {
     	  //Partition key = email
         { AttributeName: "email", KeyType: "HASH"},  
         //Sort key = Template Name 
-        { AttributeName: "type", KeyType: "RANGE" }  
     ],
     AttributeDefinitions: [ 
         //String expeceted for both keys.      
         { AttributeName: "email", AttributeType: "S" },
-        { AttributeName: "type", AttributeType: "S" }
     ],
     ProvisionedThroughput: {       
         ReadCapacityUnits: 500, 

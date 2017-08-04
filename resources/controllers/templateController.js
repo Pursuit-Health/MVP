@@ -1,11 +1,10 @@
 
-
-//TODO: Change format so that you get and then set data for adding templates.
+const dynamodb = require('../dbTables/templateTable');
 var AWS = require("aws-sdk");
 
 AWS.config.update({
     region: "us-west-2",
-    endpoint: "arn:aws:dynamodb:us-east-1:399707203552",
+    endpoint: "https://dynamodb.us-west-2.amazonaws.com",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID, 
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
@@ -61,10 +60,9 @@ exports.addTemplate = function(req, res, callback) {
    		var templates = data.Item.info;
    		var index = templates.length - 1;
    		var params = {
-   		   TableName: "Users",
+   		   TableName: "Templates",
    		   Key:{
-   		       "type": "Templates",
-   		       "email": req.body.email
+   		       "email": req.body.email,
    		   },
    		   UpdateExpression: "set info = :i",
    		   ExpressionAttributeValues:{
@@ -100,10 +98,9 @@ For applying a template to a client, the request object should look as follows:
 exports.applyTemplate = function(req,res,callback) {
 	//Trainer sends client template.
 	var params = {
-		TableName: "Users",
+		TableName: "Templates",
 		Key: {
 			"email" : req.body.email,
-			"type" : "Templates"
 		}
 	}
 
@@ -112,10 +109,9 @@ exports.applyTemplate = function(req,res,callback) {
 			helper.sendResponse(callback, null, "Template aquisition error", err);
 		} else {
 				var params = {
-			 	   TableName: "Users",
+			 	   TableName: "Templates",
 			 	   Key:{
-			 	       "type": "Templates",
-			 	       "email": req.body.client // client's email
+			 	       "email": req.body.client,
 			 	   }
 			 	}
 
@@ -126,9 +122,8 @@ exports.applyTemplate = function(req,res,callback) {
 			  		data.Item.info.push(req.body.template)
 			  		var templates = data.Item.info;
 			  		var params = {
-			  		   TableName: "Users",
+			  		   TableName: "Templates",
 			  		   Key:{
-			  		       "type": "Templates",
 			  		       "email": req.body.email
 			  		   },
 			  		   UpdateExpression: "set info = :i",
@@ -154,10 +149,9 @@ exports.applyTemplate = function(req,res,callback) {
 
 exports.getAllTemplates = function(req, res, callback) {
 	var params = {
-		TableName: "Users",
+		TableName: "Templates",
 		Key: {
 			"email": req.body.email,
-			"type": "Templates"
 		}
 	}
 
@@ -180,9 +174,8 @@ For deleting a template, the object should look as follows
 
 exports.deleteTemplate = function(req,res,callback) {
 	var params = {
-  	   TableName: "Users",
+  	   TableName: "Templates",
   	   Key:{
-  	       "type": "Templates",
   	       "email": req.body.email
   	   }
   	}
@@ -192,7 +185,7 @@ exports.deleteTemplate = function(req,res,callback) {
    	   helper.sendResponse(callback, null, "Unable to find item. Error JSON:", err);
    	} else {
    		var templates = data.Item.info
-   		console.log(typeof templates);
+
 
 
    		templates.forEach(function(template, index) {
@@ -201,9 +194,8 @@ exports.deleteTemplate = function(req,res,callback) {
    			}
    		})
    		var params = {
-   		   TableName: "Users",
+   		   TableName: "Templates",
    		   Key:{
-   		       "type": "Templates",
    		       "email": req.body.email
    		   },
    		   UpdateExpression: "set info = :i",
@@ -263,9 +255,8 @@ The front-end developer can add any number of properties to each exercise/templa
 */
 exports.updateTemplate = function(req,res,callback) {
 		var params = {
-	  	   TableName: "Users",
+	  	   TableName: "Templates",
 	  	   Key:{
-	  	       "type": "Templates",
 	  	       "email": req.body.email
 	  	   }
 	  	}
@@ -281,9 +272,8 @@ exports.updateTemplate = function(req,res,callback) {
 	   			}
 	   		})
 	   		var params = {
-	   		   TableName: "Users",
+	   		   TableName: "Templates",
 	   		   Key:{
-	   		       "type": "Templates",
 	   		       "email": req.body.email
 	   		   },
 	   		   UpdateExpression: "set info = :i",

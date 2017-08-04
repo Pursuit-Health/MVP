@@ -1,4 +1,4 @@
-const dynamodb = require('../dbTables/userTable');
+const dynamodb = require('../dbTables/eventTable');
 
 var AWS = require("aws-sdk");
 
@@ -59,10 +59,9 @@ for add event, the request body should look as follows
 
 exports.addEvent = function(req, res, callback) {
 	var params = {
-		TableName: "Users",
+		TableName: "Events",
 		Key: {
-			"type": "Events",
-			"email": req.body.email
+			"email": req.body.email,
 		}
 	};
 	docClient.get(params, function(err, data) {
@@ -75,14 +74,13 @@ exports.addEvent = function(req, res, callback) {
 			data.Item.events.push(event);
 			var Events = data.Item.events;
 			var params = {
-				TableName: "Users",
+				TableName: "Events",
 				Key: {
-					"type": "Events",
-					"email": req.body.email
+					"email": req.body.email,
 				},
 				UpdateExpression: "set events = :i",
 				ExpressionAttributeValues: {
-					":i": Events,
+					":i": events,
 				},
 				ReturnValues: "UPDATED_NEW"
 			};
@@ -111,10 +109,9 @@ for sendEvent, request body should look as follows:
 
 exports.sendEvent = function(req, res, callback) {
 	var params = {
-		TableName: "Users",
+		TableName: "Events",
 		Key: {
-			"type": "Events",
-			"email": req.body.email
+			"email": req.body.email,
 		}
 	};
 	docClient.get(params, function(err, data) {
@@ -127,10 +124,9 @@ exports.sendEvent = function(req, res, callback) {
 			data.Item.invites.push(event);
 			var invites = data.Item.invites;
 			var params = {
-				TableName: "Users",
+				TableName: "Events",
 				Key: {
-					"type": "Events",
-					"email": req.body.email
+					"email": req.body.email,
 				},
 				UpdateExpression: "set invites = :i",
 				ExpressionAttributeValues: {
@@ -159,10 +155,9 @@ For acceptinvite, you need the following:
 
 exports.acceptInvite = function(req, res, callback) {
 	var params = {
-		TableName: "Users",
+		TableName: "Events",
 		Key: {
-			"type": "Events",
-			"email": req.body.client.email
+			"email": req.body.client.email,
 		}
 	};
 	docClient.get(params, function(err, data) {
@@ -178,9 +173,8 @@ exports.acceptInvite = function(req, res, callback) {
 				}
 			});
 			var params = {
-				TableName: "Users",
+				TableName: "Events",
 				Key: {
-					"type": "Events",
 					"email": req.body.client.email
 				},
 				UpdateExpression: "set invites = :i",
@@ -194,9 +188,8 @@ exports.acceptInvite = function(req, res, callback) {
 					helper.sendResponse(callback, null, "Unable to update item. Error JSON:", err);
 				} else {
 					var params = {
-						TableName: "Users",
+						TableName: "Events",
 						Key: {
-							"type": "Events",
 							"email": req.body.client.email
 						}
 					};
@@ -207,10 +200,9 @@ exports.acceptInvite = function(req, res, callback) {
 							data.Item.events.push(event);
 							var events = data.Item.events;
 							var params = {
-								TableName: "Users",
+								TableName: "Events",
 								Key: {
-									"type": "Events",
-									"email": req.body.client.email
+									"email": req.body.client.email,
 								},
 								UpdateExpression: "set events = :i",
 								ExpressionAttributeValues: {
@@ -223,10 +215,9 @@ exports.acceptInvite = function(req, res, callback) {
 									helper.sendResponse(callback, null, "Unable to update item. Error JSON:", err);
 								} else { 
 									var params = {
-										TableName: "Users",
+										TableName: "Events",
 										Key: {
 											email: event.trainer.email,
-											type: "Events"
 										}
 									};
 									docClient.get(params, function(err, data) {
@@ -240,10 +231,9 @@ exports.acceptInvite = function(req, res, callback) {
 												}
 											});
 											var params = {
-												TableName: "Users",
+												TableName: "Events",
 												Key: {
-													"type": "Events",
-													"email": event.trainer.email
+													"email": event.trainer.email,
 												},
 												UpdateExpression: "set events = :i",
 												ExpressionAttributeValues: {
@@ -272,10 +262,9 @@ exports.acceptInvite = function(req, res, callback) {
 
 exports.getAllEvents = function(req, res, callback) {
 	var params = {
-		TableName: "Users",
+		TableName: "Events",
 		Key: {
 			email: req.body.email,
-			type: "Events"
 		}
 	};
 
@@ -291,10 +280,9 @@ exports.getAllEvents = function(req, res, callback) {
 
 exports.getAllInvites = function(req, res, callback) {
 	var params = {
-		TableName: "Users",
+		TableName: "Events",
 		Key: {
 			email: req.body.email,
-			type: "Events"
 		}
 	};
 
@@ -323,9 +311,8 @@ exports.deleteEvent = function(req, res, callback) {
 		var clients = req.body.event.clients;
 		clients.forEach((client)=> {
 			var params = {
-				TableName: "Users",
+				TableName: "Events",
 				Key: {
-					"type": "Events",
 					"email": client
 				}
 			};
@@ -340,9 +327,8 @@ exports.deleteEvent = function(req, res, callback) {
 						}
 					});
 					var params = {
-						TableName: "Users",
+						TableName: "Events",
 						Key: {
-							"type": "Events",
 							"email": client
 						},
 						UpdateExpression: "set events = :i",
@@ -363,10 +349,9 @@ exports.deleteEvent = function(req, res, callback) {
 		});
 	} else {
 		var params = {
-			TableName: "Users",
+			TableName: "Events",
 			Key: {
-				"type": "Events",
-				"email": req.body.email
+				"email": req.body.email,
 			}
 		};
 		docClient.get(params, function(err, data) {
@@ -380,10 +365,9 @@ exports.deleteEvent = function(req, res, callback) {
 					}
 				});
 				var params = {
-					TableName: "Users",
+					TableName: "Events",
 					Key: {
-						"type": "Events",
-						 "email": req.body.email
+						 "email": req.body.email,
 					},
 					UpdateExpression: "set events = :i",
 					ExpressionAttributeValues: {

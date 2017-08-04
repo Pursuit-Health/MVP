@@ -47,7 +47,6 @@ exports.addUser = function(req, res, callback) {
 					params = {
 						TableName: 'Templates',
 						Item: {
-							type: "Templates",
 							email: req.body.email,
 							info: [],
 						}
@@ -299,7 +298,7 @@ exports.changePassword = function(req, res, callback) {
 				}
 				//Maybe send another email confirming password change
 				var params = {
-					TableName: "Users",
+					TableName: "Tokens",
 					Key: {
 						"email": req.params.token,
 						"type": 'reset'

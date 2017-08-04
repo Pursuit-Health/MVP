@@ -1,3 +1,5 @@
+const dynamodb = require('../dbTables/templateTable');
+
 var AWS = require("aws-sdk");
 
 AWS.config.update({
@@ -18,12 +20,10 @@ var params = {
     	  //Partition key = email
         { AttributeName: "email", KeyType: "HASH"},  
         //Sort key = Template Name 
-        { AttributeName: "template", KeyType: "RANGE" }  
     ],
     AttributeDefinitions: [ 
         //String expeceted for both keys.      
         { AttributeName: "email", AttributeType: "S" },
-        { AttributeName: "template", AttributeType: "S" }
     ],
     ProvisionedThroughput: {       
         ReadCapacityUnits: 500, 
