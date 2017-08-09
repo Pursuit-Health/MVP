@@ -74,7 +74,6 @@ exports.addTemplate = function(req, res, callback) {
    			if (err) {
    			   helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
    			} else {
-   				console.log("template added", data.Attributes.info);
    				helper.sendResponse(callback, true, "Template added", null, data.Attributes.info[index]);
 
    			}
@@ -136,7 +135,7 @@ exports.applyTemplate = function(req,res,callback) {
 			  			if (err) {
 			  			   helper.sendResponse(callback, null, "Unable to apply item. Error JSON:", err);
 			  			} else {
-			  				console.log("template added", data)
+			  				
 			  				helper.sendResponse(callback, true, "Template applied");
 			  			}
 			  		})	
@@ -264,9 +263,11 @@ exports.updateTemplate = function(req,res,callback) {
 	   	if (err) {
 	   	   helper.sendResponse(callback, null, "Unable to find item. Error JSON:", err);
 	   	} else {
-	   		var templates = data.Item.info
+	   		var templates = data.Item.info;
+	   		var ind;
 	   		templates.forEach(function(template, index) {
 	   			if(template.id === req.body.template.id) {
+	   				ind = index;
 	   				templates.splice(index, 1);
 	   			}
 	   		})
@@ -287,7 +288,7 @@ exports.updateTemplate = function(req,res,callback) {
 	   			   helper.sendResponse(callback, null, "Unable to update item. Error JSON:", err);
 	   			} else {
 	   				console.log("template added")
-	   				helper.sendResponse(callback, true, "Template updated")
+	   				helper.sendResponse(callback, true, "Template updated", null, data.Attributes.info[ind]);
 	   			}
 	   		})	
 	   	}

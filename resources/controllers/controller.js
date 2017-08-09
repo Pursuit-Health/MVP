@@ -394,7 +394,7 @@ exports.addClient = function(req, res, callback) {
 				if (err) {
 					helper.sendResponse(callback, null, "Unable to add item. Error JSON:", err);
 				} else {
-					helper.sendResponse(callback, true, "Client added");
+					helper.sendResponse(callback, true, "Client added", null, req.body.client);
 				}
 			});	
 		}

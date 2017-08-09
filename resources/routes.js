@@ -19,12 +19,12 @@ router.route('/signup')
 });
 //Sign in Route
 router.route('/signin')
-.get(function(req, res, next) {
+.post(function(req, res, next) {
 	controller.checkUser(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(200).send(data);
+		res.status(201).send(data);
 	});
 }); 
 
@@ -42,12 +42,12 @@ router.route('/forgot')
 
 //Change password
 router.route('/reset/:token')
-.get(function(req, res, next) {
+.post(function(req, res, next) {
 	controller.tokenCheck(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(200).send(data);
+		res.status(201).send(data);
 	});
 });
 
@@ -67,7 +67,7 @@ router.route('/reset/:token')
 
 //Checks a user's session on every request after having signed in.
 router.route('/*')
-.get(function(req, res, next) {
+.post(function(req, res, next) {
 	controller.checkSession(req, res, function(data) {
 		console.log(req.session);
 		if (data) {
@@ -108,12 +108,12 @@ router.route('/logout')
 //Template Routes
 
 router.route('/template/create')
-.get(function(req, res, next) {
+.post(function(req, res, next) {
 	templateController.addTemplate(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(200).send(data);
+		res.status(201).send(data);
 	});
 });
 
@@ -128,12 +128,12 @@ router.route('/template/apply')
 });
 
 router.route('/template/getAll')
-.get(function(req, res, next) {
+.post(function(req, res, next) {
 	templateController.getAllTemplates(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(200).send(data);
+		res.status(201).send(data);
 	});
 });
 
@@ -159,12 +159,12 @@ router.route('/template/update')
 
 //Event Routes
 router.route('/event/add')
-.get(function(req, res, next) {
+.post(function(req, res, next) {
 	eventController.addEvent(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(200).send(data);
+		res.status(201).send(data);
 	});
 });
 
@@ -179,22 +179,22 @@ router.route('/event/send')
 });
 
 router.route('/event/getAllEvents')
-.get(function(req, res, next) {
+.post(function(req, res, next) {
 	eventController.getAllEvents(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(200).send(data);
+		res.status(201).send(data);
 	});
 });
 
 router.route('/event/getAllInvites')
-.get(function(req, res, next) {
+.post(function(req, res, next) {
 	eventController.getAllInvites(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(200).send(data);
+		res.status(201).send(data);
 	});
 });
 
@@ -220,12 +220,12 @@ router.route('/client/add')
 });
 
 router.route('/client/getAll')
-.get(function(req, res, next) {
+.post(function(req, res, next) {
 	controller.getAllClients(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(200).send(data);
+		res.status(201).send(data);
 	});
 });
 
