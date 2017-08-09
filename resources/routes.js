@@ -19,12 +19,12 @@ router.route('/signup')
 });
 //Sign in Route
 router.route('/signin')
-.post(function(req, res, next) {
+.get(function(req, res, next) {
 	controller.checkUser(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(201).send(data);
+		res.status(200).send(data);
 	});
 }); 
 
@@ -65,18 +65,23 @@ router.route('/reset/:token')
 
 //Check Session Routes
 
-//Used to verify if a users existing cookie exists. If it does, client can bypass login
-router.route('/session')
-.post(function(req, res, next) {
+//Checks a user's session on every request after having signed in.
+router.route('/*')
+.get(function(req, res, next) {
 	controller.checkSession(req, res, function(data) {
-		if (data.error) {
-			res.status(500).send(data);
+		console.log(req.session);
+		if (data) {
+			if (data.error) {
+				res.status(500).send(data);
+			}
+			next();
+		} else {
+			res.status(401).send('You haven\'t logged in yet or your session has expired.');		
 		}
-		res.status(201).send(data);
 	});
+		
 });
 
-//Checks a user's session on every request after having signed in.
 router.route('/*')
 .post(function(req, res, next) {
 	controller.checkSession(req, res, function(data) {
@@ -103,12 +108,12 @@ router.route('/logout')
 //Template Routes
 
 router.route('/template/create')
-.post(function(req, res, next) {
+.get(function(req, res, next) {
 	templateController.addTemplate(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(201).send(data);
+		res.status(200).send(data);
 	});
 });
 
@@ -123,12 +128,12 @@ router.route('/template/apply')
 });
 
 router.route('/template/getAll')
-.post(function(req, res, next) {
+.get(function(req, res, next) {
 	templateController.getAllTemplates(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(201).send(data);
+		res.status(200).send(data);
 	});
 });
 
@@ -154,12 +159,12 @@ router.route('/template/update')
 
 //Event Routes
 router.route('/event/add')
-.post(function(req, res, next) {
+.get(function(req, res, next) {
 	eventController.addEvent(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(201).send(data);
+		res.status(200).send(data);
 	});
 });
 
@@ -174,22 +179,22 @@ router.route('/event/send')
 });
 
 router.route('/event/getAllEvents')
-.post(function(req, res, next) {
+.get(function(req, res, next) {
 	eventController.getAllEvents(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(201).send(data);
+		res.status(200).send(data);
 	});
 });
 
 router.route('/event/getAllInvites')
-.post(function(req, res, next) {
+.get(function(req, res, next) {
 	eventController.getAllInvites(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);
 		}
-		res.status(201).send(data);
+		res.status(200).send(data);
 	});
 });
 
@@ -215,7 +220,7 @@ router.route('/client/add')
 });
 
 router.route('/client/getAll')
-.post(function(req, res, next) {
+.get(function(req, res, next) {
 	controller.getAllClients(req, res, function(data) {
 		if (data.error) {
 			res.status(500).send(data);

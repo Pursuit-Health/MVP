@@ -7,7 +7,6 @@ const saltRounds = 10;
 const nodemailer = require('nodemailer');
 const crypto = require("crypto");
 const helper = require('../helper.js');
-
 var AWS = require("aws-sdk");
 
 AWS.config.update({
